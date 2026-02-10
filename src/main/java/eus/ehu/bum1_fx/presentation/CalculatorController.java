@@ -4,9 +4,7 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import eus.ehu.bum1_fx.business_logic.CommissionCalculator;
-import eus.ehu.bum1_fx.business_logic.Currency;
-import eus.ehu.bum1_fx.business_logic.ForexOperator;
+import eus.ehu.bum1_fx.business_logic.*;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,13 +32,16 @@ public class CalculatorController {
         @FXML
         private ComboBox<String> toComboBox;
 
+        public ExchangeCalculator bizLogic;
+
         @FXML
         void initialize() {
+           this.bizLogic = new BarcenaysCalculator();
             // initialize toComboBox
-            fromComboBox.setItems(FXCollections.observableArrayList(Currency.longNames()));
+            fromComboBox.setItems(FXCollections.observableArrayList(bizLogic.getCurrencyLongNames()));
 
             // initialize fromComboBox
-            toComboBox.setItems(FXCollections.observableArrayList(Currency.longNames()));
+            toComboBox.setItems(FXCollections.observableArrayList(bizLogic.getCurrencyLongNames()));
 
             result.setBackground(new Background(
                     new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -48,47 +49,45 @@ public class CalculatorController {
 
         @FXML
         void onClick(ActionEvent event) {
-            try {
-                double origAmount = Double.parseDouble(amountTextField.getText());
+             try {
+            double origAmount = Double.parseDouble(amountTextField.getText());
 
 					/* Invalid numbers will be trapped in the catch block. But
 					   non-positive numbers will also be discarded */
-                if (origAmount <= 0) throw new NumberFormatException();
-                String origCurrency = fromComboBox.getValue();
-                origCurrency = origCurrency.substring(0, 3);
-                String endCurrency = toComboBox.getValue();
-                endCurrency = endCurrency.substring(0, 3);
+            if (origAmount <= 0) throw new NumberFormatException();
+            String origCurrency = fromComboBox.getValue();
+            origCurrency = origCurrency.substring(0, 3);
+            String endCurrency = toComboBox.getValue();
+            endCurrency = endCurrency.substring(0, 3);
 
 					/* If both chosen currencies are equal the online converter
 					   won't provide a result */
-                if (origCurrency.equals(endCurrency)) {
-                    result.setText("Please select different currencies");
-                } else {
-                    ForexOperator operator = new ForexOperator(origCurrency,
-                            origAmount, endCurrency);
-                    try {
-                        double destAmount = operator.getChangeValue();
-                        CommissionCalculator calculator = new CommissionCalculator(destAmount,
-                                endCurrency);
-                        destAmount -= calculator.calculateCommission();
-                        NumberFormat twoDecimal = NumberFormat.getNumberInstance(Locale.US);
-                        twoDecimal.setMaximumFractionDigits(2);
-                        twoDecimal.setRoundingMode(RoundingMode.FLOOR);
-                        if (destAmount < 0) {
-                            result.setText("Minimum commission is 3.00€");
-                            return;
-                        }
-                        result.setText(twoDecimal.format(destAmount));
-
-                    } catch (Exception e1) {
-                        // e1.printStackTrace();
-                        result.setText("Conversion could not be done");
+            if (origCurrency.equals(endCurrency)) {
+                result.setText("Please select different currencies");
+            } else {
+                try {
+                    double destAmount = bizLogic.getChangeValue(origCurrency, endCurrency,
+                            origAmount);
+                    destAmount -= bizLogic.calculateCommission(destAmount,
+                            endCurrency);
+                    NumberFormat twoDecimal = NumberFormat.getNumberInstance(Locale.US);
+                    twoDecimal.setMaximumFractionDigits(2);
+                    twoDecimal.setRoundingMode(RoundingMode.FLOOR);
+                    if (destAmount < 0) {
+                        result.setText("Minimum commission is 3.00€");
+                        return;
                     }
+                    result.setText(twoDecimal.format(destAmount));
+
+                } catch (Exception e1) {
+                    //e1.printStackTrace();
+                    result.setText("Conversion could not be done");
                 }
-            } catch (NumberFormatException e2) {
-                result.setText("Please introduce a valid amount");
             }
+        } catch (NumberFormatException e2) {
+            result.setText("Please introduce a valid amount");
         }
 
 
+    }
 }

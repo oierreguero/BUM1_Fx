@@ -69,7 +69,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>eus.ehu.bum1_fx/eus.ehu.bum1_fx.CalculatorWindow</mainClass>
+                            <mainClass>eus.ehu.bum1_fx.presentation.CalculatorWindow</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>

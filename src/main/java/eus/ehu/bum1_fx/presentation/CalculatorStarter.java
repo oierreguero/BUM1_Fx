@@ -4,11 +4,11 @@ import java.util.InputMismatchException;
 import java.util.Locale;
 import java.util.Scanner;
 
-import eus.ehu.bum1_fx.business_logic.CommissionCalculator;
-import eus.ehu.bum1_fx.business_logic.Currency;
-import eus.ehu.bum1_fx.business_logic.ForexOperator;
+import eus.ehu.bum1_fx.business_logic.*;
 
 public class CalculatorStarter {
+
+	public ExchangeCalculator bizLogic = new BarcenaysCalculator();
 
 	public static void printValidCurrencies() {
 		System.out.println("Valid currencies with their codes are listed below.");
